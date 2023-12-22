@@ -1,0 +1,780 @@
+#include <stdio.h>
+#include <string.h>
+
+#include "s21_string.h"
+
+char str1[MAX] = "hello world";
+char str2[MAX] = "hello school";
+char str3[MAX] = "hello school";
+char str4[MAX]= "tabt1/tcdt2/teft3/tght4";
+
+char buff[MAX] = "";
+char buff2[MAX] = "";
+
+#test memcmp1
+// same strings
+ck_assert_int_eq(memcmp(str2, str3, MAX), s21_memcmp(str2, str3, MAX));
+
+#test memcmp2
+// different strings
+ck_assert_int_eq(memcmp(str1, str2, MAX), s21_memcmp(str1, str2, MAX));
+
+
+#test memchr1 
+// target is NOT in string
+char targ1 = 's'; 
+ck_assert_ptr_eq(memchr(str1, targ1, MAX), s21_memchr(str1, targ1, MAX));
+
+#test memchr2 
+// target IS in string
+char targ2 = 'w'; 
+ck_assert_ptr_eq(memchr(str1, targ2, MAX), s21_memchr(str1, targ2, MAX));
+
+
+#test memcpy1
+// copy full string into an empty one
+char dest[MAX] = "";
+ck_assert_str_eq(memcpy(dest, str1, MAX), s21_memcpy(dest, str1, MAX));
+
+#test memcpy2
+// copy half of string into an empty one
+char dest[MAX] = "";
+int source_len = strlen(str2) / 2;
+ck_assert_str_eq(memcpy(dest, str2, source_len), s21_memcpy(dest, str2, source_len));
+
+
+#test memset1
+// fill full string with the filler
+char filler = '%';
+ck_assert_str_eq(memset(str1, filler, MAX), s21_memset(str1, filler, MAX));
+
+#test memset2
+// fill part of the string with the filler
+char filler = '$';
+ck_assert_str_eq(memset(str1, filler, MAX / 2), s21_memset(str1, filler, MAX / 2));
+
+#test memset3
+// fill full string with the null terminator
+char filler = '\0';
+ck_assert_str_eq(memset(str1, filler, MAX), s21_memset(str1, filler, MAX));
+
+
+#test strchr1
+// first occurrence of a valid character
+char target = 'l';
+ck_assert_ptr_eq(strchr(str1, target), s21_strchr(str1, target));
+
+#test strchr2
+// first occurrence of invalid character is NULL
+char target = 'z';
+ck_assert_ptr_eq(strchr(str1, target), s21_strchr(str1, target));
+
+
+#test strtok1
+// split the string with the correct character
+char del[] = "/"; 
+ck_assert_ptr_eq(strtok(str4, del), s21_strtok(str4, del));
+
+#test strtok2
+// split the string with an invalid character
+char del[] = "."; 
+ck_assert_ptr_eq(strtok(str4, del), s21_strtok(str4, del));
+
+#test strtok3
+char del[] = "t/"; 
+ck_assert_ptr_eq(strtok(str4, del), s21_strtok(str4, del));
+
+#test strtok4
+char del[] = "t/?"; 
+ck_assert_ptr_eq(strtok(str4, del), s21_strtok(str4, del));
+
+#test strtok5
+char del[] = "%t/?"; 
+ck_assert_ptr_eq(strtok(str4, del), s21_strtok(str4, del));
+
+#test strrchr1
+// last occurrence of a valid character
+int symbol = 'l'; 
+ck_assert_ptr_eq(strrchr(str1, symbol), s21_strrchr(str1, symbol));
+
+#test strrchr2
+// last occurrence of invalid character
+int symbol = 'a'; 
+ck_assert_ptr_eq(strrchr(str1, symbol), s21_strrchr(str1, symbol));
+
+
+#test strpbrk1
+// search for the correct character
+char symb[MAX] = "/";
+ck_assert_ptr_eq(strpbrk(str4, symb), s21_strpbrk(str4, symb));
+
+#test strpbrk2
+// search for an invalid character
+char symb[MAX] = ".";
+ck_assert_ptr_eq(strpbrk(str4, symb), s21_strpbrk(str4, symb));
+
+
+#test strncpy1
+// copy full big string into empty string
+char harbour[10] = "";
+char harbour2[10] = "";
+size_t n = sizeof(harbour) - 1;
+ck_assert_str_eq(strncpy(harbour, str2, n), s21_strncpy(harbour2, str2, n));
+
+#test strncpy2
+// copy part of big string into empty string
+char harbour3[10] = "";
+char harbour4[10] = "";
+size_t n = 5;
+ck_assert_str_eq(strncpy(harbour3, str2, n), s21_strncpy(harbour4, str2, n));
+
+#test strncpy3
+// copy string with null terminator into empty string
+char harbour5[10] = "";
+char harbour6[10] = "";
+char origin[] = "School\021";
+size_t n = 10;
+ck_assert_str_eq(strncpy(harbour5, origin, n), s21_strncpy(harbour6, origin, n));
+
+
+#test strcspn1
+// second set contains chars from source
+char second[] = "owlr";  
+ck_assert_int_eq(strcspn(str1, second), s21_strcspn(str1, second));
+
+#test strcspn2
+// second set doesn't contain chars from source
+char second[] = "zqa";  
+ck_assert_int_eq(strcspn(str1, second), s21_strcspn(str1, second));
+
+#test strcspn3  
+// entire set matches
+ck_assert_int_eq(strcspn(str2, str3), s21_strcspn(str2, str3)); 
+
+
+#test strlen1
+// normal string
+ck_assert_int_eq(strlen(str1), s21_strlen(str1));
+
+#test strlen2
+// empty string
+ck_assert_int_eq(strlen(str1), s21_strlen(str1));
+
+
+#test strncat1
+// basic case
+char destin[MAX] = "School";
+char destin2[MAX] = "School";
+char extra[] = " 21";
+size_t max_len = sizeof(destin) - strlen(destin) - 1; // вычисляем сколько свободного места осталось в destin
+ck_assert_str_eq(strncat(destin, extra, max_len), s21_strncat(destin2, extra, max_len));
+
+#test strncat2
+// empty strs
+char destin[MAX] = "";
+char destin2[MAX] = "";
+char empty[MAX] = "";
+size_t max_len = sizeof(destin) - strlen(destin) - 1;
+ck_assert_str_eq(strncat(destin, empty, max_len), s21_strncat(destin2, empty, max_len));
+
+#test strncat3
+// extra doesnt fit into destination
+char destin[10] = "School";
+char destin2[10] = "School";
+char extra[] = " 21 is the best school!";
+size_t max_len = sizeof(destin) - strlen(destin) - 1;
+ck_assert_str_eq(strncat(destin, extra, max_len), s21_strncat(destin2, extra, max_len));
+
+
+#test strncmp1
+// first n symbols are identical
+size_t n = 6;
+ck_assert_int_eq(strncmp(str1, str2, n), s21_strncmp(str1, str2, n));
+
+#test strncmp2
+// first n symbols differ
+size_t n = 10;
+ck_assert_int_eq(strncmp(str1, str2, n), s21_strncmp(str1, str2, n));
+
+#test strncmp3
+// compare entire different strings
+ck_assert_int_eq(strncmp(str1, str2, MAX), s21_strncmp(str1, str2, MAX));
+
+#test strncmp4
+// compare entire identical strings
+ck_assert_int_eq(strncmp(str3, str2, MAX), s21_strncmp(str3, str2, MAX));
+
+
+#test strerror1
+// valid error number
+int err_num = 21;
+ck_assert_str_eq(strerror(err_num), s21_strerror(err_num));
+
+#test strerror2
+// invalid error number
+int err_num = 210;
+ck_assert_str_eq(strerror(err_num), s21_strerror(err_num));
+
+
+#test strstr1
+// target IS in string
+char target[] = "school";
+ck_assert_ptr_eq(strstr(str2, target), s21_strstr(str2, target));
+
+#test strstr2
+// target is NOT in string
+char target[] = "school";
+ck_assert_ptr_eq(strstr(str1, target), s21_strstr(str1, target));
+
+#test to_upper1
+// из нижнего в верхний
+char str1[MAX] = "hello world";
+char str2[MAX] = "HELLO WORLD";
+char * str3 = s21_to_upper(str1);
+ck_assert_str_eq(str3, str2);
+free(str3);
+
+#test to_upper2
+// из верхнего в верхний
+char str1[MAX] = "HELLO WORLD";
+char str2[MAX] = "HELLO WORLD";
+char * str3 = s21_to_upper(str1);
+ck_assert_str_eq(str3, str2);
+free(str3);
+
+#test to_upper3
+// цифры
+char str1[MAX] = "1234567890";
+char str2[MAX] = "1234567890";
+char * str3 = s21_to_upper(str1);
+ck_assert_str_eq(str3, str2);
+free(str3);
+
+#test to_upper4
+// пустая строка
+char *str1 = NULL;
+char *str2 = NULL;
+char * str3 = s21_to_upper(str1);
+ck_assert_ptr_eq(str3, str2);
+free(str3);
+
+#test to_upper5
+// специальные символы
+char str1[MAX] = " \t\n";
+char str2[MAX] = " \t\n";
+char * str3 = s21_to_upper(str1);
+ck_assert_str_eq(str3, str2);
+free(str3);
+
+#test to_upper6
+// разный регистр
+char str1[MAX] = "HeLlO WoRlD";
+char str2[MAX] = "HELLO WORLD";
+char * str3 = s21_to_upper(str1);
+ck_assert_str_eq(str3, str2);
+free(str3);
+
+#test to_lower1
+// из верхнего в нижний
+char str1[MAX] = "HELLO WORLD";
+char str2[MAX] = "hello world";
+char * str3 = s21_to_lower(str1);
+ck_assert_str_eq(str3, str2);
+free(str3);
+
+#test to_lower2
+// из нижнего в нижний
+char str1[MAX] = "hello world";
+char str2[MAX] = "hello world";
+char * str3 = s21_to_lower(str1);
+ck_assert_str_eq(str3, str2);
+free(str3);
+
+#test to_lower3
+// цифры
+char str1[MAX] = "1234567890";
+char str2[MAX] = "1234567890";
+char * str3 = s21_to_lower(str1);
+ck_assert_str_eq(str3, str2);
+free(str3);
+
+#test to_lower4
+// пустая строка
+char *str1 = NULL;
+char *str2 = NULL;
+char * str3 = s21_to_lower(str1);
+ck_assert_ptr_eq(str3, str2);
+free(str3);
+
+#test to_lower5
+// специальные символы
+char str1[MAX] = " \t\n";
+char str2[MAX] = " \t\n";
+char * str3 = s21_to_lower(str1);
+ck_assert_str_eq(str3, str2);
+free(str3);
+
+#test to_lower6
+// разный регистр
+char str1[MAX] = "HeLlO WoRlD";
+char str2[MAX] = "hello world";
+char * str3 = s21_to_lower(str1);
+ck_assert_str_eq(str3, str2);
+free(str3);
+
+
+#test insert1
+// insert in the middle
+char *basket = "honer";
+char *ball = "meow";
+size_t st_ind = 2;
+char *res = (char *) s21_insert(basket, ball, st_ind);
+ck_assert_str_eq(res, "homeowner");
+if (res) {
+  free(res);
+}
+
+#test insert2
+// insert in the beginning
+char *basket = "Bond";
+char *ball = "James ";
+size_t st_ind = 0;
+char *res = (char *) s21_insert(basket, ball, st_ind);
+ck_assert_str_eq(res, "James Bond");
+if (res) {
+  free(res);
+}
+
+#test insert3
+// insert in the end
+char *basket = "basket";
+char *ball = "ball";
+size_t st_ind = 6;
+char *res = (char *) s21_insert(basket, ball, st_ind);
+ck_assert_str_eq(res, "basketball");
+if (res) {
+  free(res);
+}
+
+#test insert4
+// insert an empty string
+char *basket = "School 21";
+char *ball = "";
+size_t st_ind = 6;
+char *res = (char *) s21_insert(basket, ball, st_ind);
+ck_assert_str_eq(res, basket);
+if (res) {
+  free(res);
+}
+
+#test insert5
+// insert at invalid index
+char *basket = "School 21";
+char *ball = "Sber";
+size_t st_ind = 50;
+char *exp_res = NULL;
+char *res = (char *) s21_insert(basket, ball, st_ind);
+ck_assert_ptr_eq(res, exp_res);
+if (res) { 
+  free(res);
+}
+
+#test trim1
+// input null trim
+char *triming = "\t\nSchool 21\t\n";
+char *test_trim = NULL;
+char *exp_res = "School 21";
+char *res = (char *) s21_trim(triming, test_trim);
+ck_assert_str_eq(res, exp_res);
+if (res) { 
+  free(res);
+}
+
+#test trim2
+// input one trim
+char *triming = "\t\nSchool 21\t\n";
+char *test_trim = "\t";
+char *exp_res = "\nSchool 21\t\n";
+char *res = (char *) s21_trim(triming, test_trim);
+ck_assert_str_eq(res, exp_res);
+if (res) { 
+  free(res);
+}
+
+#test trim3
+// input two trims
+char *triming = "\t\nSchool 21\t\n";
+char *test_trim = "\t\n";
+char *exp_res = "School 21";
+char *res = (char *) s21_trim(triming, test_trim);
+ck_assert_str_eq(res, exp_res);
+if (res) { 
+  free(res);
+}
+
+#test trim4
+// input not in trim
+char *triming = "\t\nSchool 21\t\n";
+char *test_trim = " ";
+char *exp_res = "\t\nSchool 21\t\n";
+char *res = (char *) s21_trim(triming, test_trim);
+ck_assert_str_eq(res, exp_res);
+if (res) { 
+  free(res);
+}
+
+#test trim5
+// input one in trim
+char *triming = "\t\nSchool 21\t\n ";
+char *test_trim = " ";
+char *exp_res = "\t\nSchool 21\t\n";
+char *res = (char *) s21_trim(triming, test_trim);
+ck_assert_str_eq(res, exp_res);
+if (res) { 
+  free(res);
+}
+
+#test clean_print
+char str[MAX] = "Life is trying things to see if they work. -Ray Bradbury";
+sprintf(buff, " ");
+s21_sprintf(buff2, " ");
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_c
+sprintf(buff, "Life is %c long lesson in humility. -James M. Barrie", 'a');
+s21_sprintf(buff2, "Life is %c long lesson in humility. -James M. Barrie", 'a');
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_d1
+int probs = 99;
+sprintf(buff, "I've got %d problems", probs);
+s21_sprintf(buff2, "I've got %d problems", probs);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_d2
+int probs = -99;
+sprintf(buff, "I've got %d problems", probs);
+s21_sprintf(buff2, "I've got %d problems", probs);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_d_plus1
+int probs = 99;
+sprintf(buff, "I've got %+d problems", probs);
+s21_sprintf(buff2, "I've got %+d problems", probs);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_d_plus2
+int probs = -99;
+sprintf(buff, "I've got %+d problems", probs);
+s21_sprintf(buff2, "I've got %+d problems", probs);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_d_space1
+int probs = 99;
+sprintf(buff, "I've got % d problems", probs);
+s21_sprintf(buff2, "I've got % d problems", probs);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_d_space2
+int probs = -99;
+sprintf(buff, "I've got % d problems", probs);
+s21_sprintf(buff2, "I've got % d problems", probs);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_u
+unsigned int ans = 42;
+sprintf(buff, "%u", ans);
+s21_sprintf(buff2, "%u", ans);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_u_neg
+// negative test
+int ans = -42;
+ck_assert_int_eq(sprintf(buff, "%u", ans), s21_sprintf(buff2, "%u", ans));
+
+#test sprintf_width
+int num = 78;
+sprintf(buff, "%6d", num);
+s21_sprintf(buff2, "%6d", num);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_width_2
+int num = 123;
+sprintf(buff, "%3d", num);
+s21_sprintf(buff2, "%3d", num);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_width_neg
+char *str = "stroka";
+sprintf(buff, "%6s", str);
+s21_sprintf(buff2, "%6s", str);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_flag_minus
+int min = 5;
+sprintf(buff, "%-6d", min);
+s21_sprintf(buff2, "%-6d", min);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_flag_plus
+int plus = 21;
+sprintf(buff, "%+d", plus);
+s21_sprintf(buff2, "%+d", plus);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_flag_zero
+int zero = 9;
+sprintf(buff, "%06d", zero);
+s21_sprintf(buff2, "%06d", zero);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_flag_space
+int space = 8;
+sprintf(buff, "%d", space);
+s21_sprintf(buff2, "%d", space);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_flag_procent
+int space = 8;
+sprintf(buff, "%% %d", space);
+s21_sprintf(buff2, "%% %d", space);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_flag_float
+float space = 6.9;
+sprintf(buff, "%f", space);
+s21_sprintf(buff2, "%f", space);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_flag_float_with_rounding
+float space = 6.96568981;
+sprintf(buff, "%f", space);
+s21_sprintf(buff2, "%f", space);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_prec
+int ans = 42;
+sprintf(buff, "%.6d", ans);
+s21_sprintf(buff2, "%.6d", ans);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_char
+sprintf(buff, "%c", 'X');
+s21_sprintf(buff2, "%c", 'X');
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_char_with_width
+sprintf(buff, "%6c", 'X');
+s21_sprintf(buff2, "%6c", 'X');
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_char_with_width_and_minus
+sprintf(buff, "%-6c", 'X');
+s21_sprintf(buff2, "%-6c", 'X');
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_h_for_int
+short ans = 54;
+sprintf(buff, "%hd", ans);
+s21_sprintf(buff2, "%hd", ans);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_int_precision_bigger_with
+int ans = 54;
+sprintf(buff, "%1.23d", ans);
+s21_sprintf(buff2, "%1.23d", ans);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_uint_precision_bigger_with
+int ans = 54;
+sprintf(buff, "%1.25u", ans);
+s21_sprintf(buff2, "%1.25u", ans);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_double_with_width_space
+float ans = 5.4;
+sprintf(buff, "%10f", ans);
+s21_sprintf(buff2, "%10f", ans);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_double_with_width_zero
+float ans = 5.4;
+sprintf(buff, "%010f", ans);
+s21_sprintf(buff2, "%010f", ans);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_double_with_minus
+float ans = 5.4;
+sprintf(buff, "%-10f", ans);
+s21_sprintf(buff2, "%-10f", ans);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_string_with_width_space
+sprintf(buff, "%10s", "string");
+s21_sprintf(buff2, "%10s", "string");
+ck_assert_str_eq(buff, buff2);
+
+
+#test sprintf_spec_string_with_width_and_minus
+sprintf(buff, "%-s", "string");
+s21_sprintf(buff2, "%-s", "string");
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_double_minus_25
+float ans = -0.05;
+sprintf(buff, "%f", ans);
+s21_sprintf(buff2, "%f", ans);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_spec_int_minus_zero
+int ans = -0;
+sprintf(buff, "%d", ans);
+s21_sprintf(buff2, "%d", ans);
+ck_assert_str_eq(buff, buff2);
+
+#test sprintf_anya
+sprintf(buff, "test");
+s21_sprintf(buff2, "test");
+ck_assert_str_eq(buff, buff2);
+
+#test octal
+char buff[MAX] = "";
+char buff2[MAX] = "";
+int a = 10;
+sprintf(buff, "%o", a);
+s21_sprintf(buff2, "%o", a);
+ck_assert_str_eq(buff, buff2);
+
+#test octal_width
+char buff[MAX] = "";
+char buff2[MAX] = "";
+int a = 10;
+sprintf(buff, "%10o", a);
+s21_sprintf(buff2, "%10o", a);
+ck_assert_str_eq(buff, buff2);
+
+#test octal_width_minus
+char buff[MAX] = "";
+char buff2[MAX] = "";
+int a = 10;
+sprintf(buff, "%-10o", a);
+s21_sprintf(buff2, "%-10o", a);
+ck_assert_str_eq(buff, buff2);
+
+#test octal_width_plus
+char buff[MAX] = "";
+char buff2[MAX] = "";
+int a = 10;
+sprintf(buff, "%+10o", a);
+s21_sprintf(buff2, "%+10o", a);
+ck_assert_str_eq(buff, buff2);
+
+#test octal_width_zero
+char buff[MAX] = "";
+char buff2[MAX] = "";
+int a = 10;
+sprintf(buff, "%010o", a);
+s21_sprintf(buff2, "%010o", a);
+ck_assert_str_eq(buff, buff2);
+
+#test hex
+char buff[MAX] = "";
+char buff2[MAX] = "";
+int a = 177;
+sprintf(buff, "%X", a);
+s21_sprintf(buff2, "%X", a);
+ck_assert_str_eq(buff, buff2);
+
+#test hex_width
+char buff[MAX] = "";
+char buff2[MAX] = "";
+int a = 177;
+sprintf(buff, "%10x", a);
+s21_sprintf(buff2, "%10x", a);
+ck_assert_str_eq(buff, buff2);
+
+#test hex_width_minus
+char buff[MAX] = "";
+char buff2[MAX] = "";
+int a = 177;
+sprintf(buff, "%-10x", a);
+s21_sprintf(buff2, "%-10x", a);
+ck_assert_str_eq(buff, buff2);
+
+#test hex_width_plus
+char buff[MAX] = "";
+char buff2[MAX] = "";
+int a = 177;
+sprintf(buff, "%+10x", a);
+s21_sprintf(buff2, "%+10x", a);
+ck_assert_str_eq(buff, buff2);
+
+#test hex_width_zero
+char buff[MAX] = "";
+char buff2[MAX] = "";
+int a = 177;
+sprintf(buff, "%010x", a);
+s21_sprintf(buff2, "%010x", a);
+ck_assert_str_eq(buff, buff2);
+
+#test hexX
+char buff[MAX] = "";
+char buff2[MAX] = "";
+int a = 178;
+sprintf(buff, "%X", a);
+s21_sprintf(buff2, "%X", a);
+ck_assert_str_eq(buff, buff2);
+
+#test hexX_width
+char buff[MAX] = "";
+char buff2[MAX] = "";
+int a = 178;
+sprintf(buff, "%10X", a);
+s21_sprintf(buff2, "%10X", a);
+ck_assert_str_eq(buff, buff2);
+
+#test hexX_width_minus
+char buff[MAX] = "";
+char buff2[MAX] = "";
+int a = 178;
+sprintf(buff, "%-10X", a);
+s21_sprintf(buff2, "%-10X", a);
+ck_assert_str_eq(buff, buff2);
+
+#test hexX_width_plus
+char buff[MAX] = "";
+char buff2[MAX] = "";
+int a = 178;
+sprintf(buff, "%+10X", a);
+s21_sprintf(buff2, "%+10X", a);
+ck_assert_str_eq(buff, buff2);
+
+#test hexX_width_zero
+char buff[MAX] = "";
+char buff2[MAX] = "";
+int a = 178;
+sprintf(buff, "%010X", a);
+s21_sprintf(buff2, "%010X", a);
+ck_assert_str_eq(buff, buff2);
+
+#test int_with_l
+long int a = 2147483647;
+sprintf(buff, "%ld", a);
+s21_sprintf(buff2, "%ld", a);
+ck_assert_str_eq(buff, buff2);
+
+#test string
+char buff[MAX] = "";
+char str[10] = "string";
+char buff2[MAX] = "";
+sprintf(buff, "%s", str);
+s21_sprintf(buff2, "%s", str);
+ck_assert_str_eq(buff, buff2);
+
+#test string_NULL
+char buff[MAX] = "";
+char *str = NULL;
+char buff2[MAX] = "";
+sprintf(buff, "%s", str);
+s21_sprintf(buff2, "%s", str);
+ck_assert_str_eq(buff, buff2);
